@@ -65,3 +65,42 @@ void* heap_malloc(unsigned int size){
 
 	return track->ptr;
 }
+
+
+double_linked_list* get_elem_ptr(void* ptr){
+	double_linked_list* track = buffer_tracker;
+
+	while (track != NULL && track->ptr != ptr) {
+		track = track->next;
+	}
+	return track;
+}
+
+void merge_tracks(double_linked_list* track, double_linked_list* track_next ){
+	track->size = track->size + track_next->size; // We are extending this buffer
+	track->next = track_next->next;
+	track->next->prev = track;
+	free(track_next);
+}
+
+void heap_free(void* ptr){
+	double_linked_list* track = get_elem_ptr(ptr);
+
+	if(track == NULL){
+		return;
+	}
+
+	track->filled = BUFF_FREE;
+
+	double_linked_list* track_next = track->next;
+
+	if(track_next != NULL && track_next->filled == BUFF_FREE){
+		merge_tracks(track,track_next);
+	}
+
+	double_linked_list* track_prev = track->prev;
+	if(track_prev != NULL && track_prev->filled == BUFF_FREE){
+		merge_tracks(track_prev,track);
+	}
+
+}

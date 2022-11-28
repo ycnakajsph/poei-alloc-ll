@@ -88,6 +88,126 @@ void test_first_fit_malloc(){
 	free_heap();
 }
 
+void test_malloc_simple(){
+
+	init_heap();
+
+	unsigned int ptr0_size = 12;
+	unsigned int ptr1_size = 13;
+	char* ptr0 = (char*) heap_malloc(ptr0_size*sizeof(char));
+	char* ptr1 = (char*) heap_malloc(ptr1_size*sizeof(char));
+
+	double_linked_list* track = buffer_tracker;
+	CU_ASSERT(heap == ptr0);
+	CU_ASSERT(track->ptr == ptr0);
+	CU_ASSERT(track->size == ptr0_size);
+	CU_ASSERT(track->filled == BUFF_FILLED);
+
+	track = track->next;
+	CU_ASSERT(track->ptr == ptr1);
+	CU_ASSERT(track->ptr == (char*)heap+ptr0_size);
+	CU_ASSERT(track->size == ptr1_size);
+	CU_ASSERT(track->filled == BUFF_FILLED);
+
+	track = track->next;
+	CU_ASSERT(track->ptr == (char*)heap+ptr0_size+ptr1_size);
+	CU_ASSERT(track->size == SIZE_HEAP - ptr0_size - ptr1_size);
+	CU_ASSERT(track->filled == BUFF_FREE);
+
+	free_heap();
+}
+
+void test_heap_free(){
+
+	init_heap();
+
+	unsigned int ptr0_size = 12;
+	unsigned int ptr1_size = 13;
+	unsigned int ptr2_size = 14;
+	char* ptr0 = (char*) heap_malloc(ptr0_size*sizeof(char));
+	char* ptr1 = (char*) heap_malloc(ptr1_size*sizeof(char));
+	char* ptr2 = (char*) heap_malloc(ptr2_size*sizeof(char));
+
+	heap_free(ptr1);
+
+	double_linked_list* track = buffer_tracker;
+
+	CU_ASSERT(heap == ptr0);
+	CU_ASSERT(track->ptr == ptr0);
+	CU_ASSERT(track->size == ptr0_size);
+	CU_ASSERT(track->filled == BUFF_FILLED);
+
+	track = track->next;
+
+	CU_ASSERT(track->ptr == ptr1);
+	CU_ASSERT(track->size == ptr1_size);
+	CU_ASSERT(track->filled == BUFF_FREE);
+	CU_ASSERT(track->next->ptr == ptr2); // avoiding warning unused variable
+
+	free_heap();
+}
+
+void test_heap_free_merge_left(){
+
+	init_heap();
+
+	unsigned int ptr0_size = 12;
+	unsigned int ptr1_size = 13;
+	unsigned int ptr2_size = 14;
+	unsigned int ptr3_size = 15;
+	char* ptr0 = (char*) heap_malloc(ptr0_size*sizeof(char));
+	char* ptr1 = (char*) heap_malloc(ptr1_size*sizeof(char));
+	char* ptr2 = (char*) heap_malloc(ptr2_size*sizeof(char));
+	char* ptr3 = (char*) heap_malloc(ptr3_size*sizeof(char));
+
+	heap_free(ptr1);
+	heap_free(ptr2);
+
+	double_linked_list* track = buffer_tracker;
+
+	CU_ASSERT(heap == ptr0);
+
+	track = track->next;
+	CU_ASSERT(track->ptr == ptr1);
+	CU_ASSERT(track->size == ptr1_size + ptr2_size);
+	CU_ASSERT(track->filled == BUFF_FREE);
+	CU_ASSERT(track->next->ptr == ptr3);
+	CU_ASSERT(track->next->prev == track);
+
+	free_heap();
+}
+
+void test_heap_free_merge_right(){
+
+	init_heap();
+
+	unsigned int ptr0_size = 12;
+	unsigned int ptr1_size = 13;
+	unsigned int ptr2_size = 14;
+	unsigned int ptr3_size = 15;
+	char* ptr0 = (char*) heap_malloc(ptr0_size*sizeof(char));
+	char* ptr1 = (char*) heap_malloc(ptr1_size*sizeof(char));
+	char* ptr2 = (char*) heap_malloc(ptr2_size*sizeof(char));
+	char* ptr3 = (char*) heap_malloc(ptr3_size*sizeof(char));
+
+
+	heap_free(ptr2);
+	heap_free(ptr1);
+
+	double_linked_list* track = buffer_tracker;
+
+	CU_ASSERT(heap == ptr0);
+
+	track = track->next;
+	CU_ASSERT(track->ptr == ptr1);
+	CU_ASSERT(track->size == ptr1_size + ptr2_size);
+	CU_ASSERT(track->filled == BUFF_FREE);
+	CU_ASSERT(track->next->ptr == ptr3);
+	CU_ASSERT(track->next->prev == track);
+
+	free_heap();
+}
+
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 
@@ -112,7 +232,11 @@ int main()
 		NULL == CU_add_test(pSuite, "test_first_fit_init()", test_first_fit_init)||
 		NULL == CU_add_test(pSuite, "test_heap_malloc_init()", test_heap_malloc_init)||
 		NULL == CU_add_test(pSuite, "test_heap_malloc_full_size()", test_heap_malloc_full_size)||
-		NULL == CU_add_test(pSuite, "test_first_fit_malloc()", test_first_fit_malloc)
+		NULL == CU_add_test(pSuite, "test_first_fit_malloc()", test_first_fit_malloc)||
+		NULL == CU_add_test(pSuite, "test_malloc_simple()", test_malloc_simple)||
+		NULL == CU_add_test(pSuite, "test_heap_free()", test_heap_free)||
+		NULL == CU_add_test(pSuite, "test_heap_free_merge_left()", test_heap_free_merge_left)||
+		NULL == CU_add_test(pSuite, "test_heap_free_merge_right()", test_heap_free_merge_right)
 	)
 	{
 		CU_cleanup_registry();

@@ -18,7 +18,7 @@ void free_heap(void);
 // allocate a pointer of size size
 void* heap_malloc(unsigned int size);
 // free a pointer in the heap
-void heap_free(char *ptr);
+void heap_free(void *ptr);
 
 double_linked_list* (*strategy)(unsigned int size);
 void set_strategy(double_linked_list* (*strat)(unsigned int size));
