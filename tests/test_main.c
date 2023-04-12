@@ -208,6 +208,30 @@ void test_heap_free_merge_right(){
 	free_heap();
 }
 
+void test_full_merge(){
+
+	init_heap();
+
+	unsigned int ptr0_size = 12;
+	unsigned int ptr1_size = 13;
+	unsigned int ptr2_size = 14;
+	char* ptr0 = (char*) heap_malloc(ptr0_size*sizeof(char));
+	char* ptr1 = (char*) heap_malloc(ptr1_size*sizeof(char));
+	char* ptr2 = (char*) heap_malloc(ptr2_size*sizeof(char));
+
+	strcpy(ptr0,"dummy0");
+	strcpy(ptr1,"dummy1");
+	strcpy(ptr2,"dummy2");
+
+	heap_free(ptr1);
+	// Non reg : was causing segfault
+	heap_free(ptr2);
+	heap_free(ptr0);
+
+	
+	free_heap();
+}
+
 int init_suite(void) { return 0; }
 int clean_suite(void) { return 0; }
 
@@ -236,7 +260,8 @@ int main()
 		NULL == CU_add_test(pSuite, "test_malloc_simple()", test_malloc_simple)||
 		NULL == CU_add_test(pSuite, "test_heap_free()", test_heap_free)||
 		NULL == CU_add_test(pSuite, "test_heap_free_merge_left()", test_heap_free_merge_left)||
-		NULL == CU_add_test(pSuite, "test_heap_free_merge_right()", test_heap_free_merge_right)
+		NULL == CU_add_test(pSuite, "test_heap_free_merge_right()", test_heap_free_merge_right)||
+		NULL == CU_add_test(pSuite, "test_full_merge()", test_full_merge)
 	)
 	{
 		CU_cleanup_registry();

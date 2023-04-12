@@ -79,7 +79,9 @@ double_linked_list* get_elem_ptr(void* ptr){
 void merge_tracks(double_linked_list* track, double_linked_list* track_next ){
 	track->size = track->size + track_next->size; // We are extending this buffer
 	track->next = track_next->next;
-	track->next->prev = track;
+	if (track->next != NULL){
+		track->next->prev = track;
+	}
 	free(track_next);
 }
 
@@ -94,8 +96,10 @@ void heap_free(void* ptr){
 
 	double_linked_list* track_next = track->next;
 
-	if(track_next != NULL && track_next->filled == BUFF_FREE){
-		merge_tracks(track,track_next);
+	if (track_next != NULL){
+		if(track_next != NULL && track_next->filled == BUFF_FREE){
+			merge_tracks(track,track_next);
+		}
 	}
 
 	double_linked_list* track_prev = track->prev;

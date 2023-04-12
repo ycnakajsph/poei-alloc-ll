@@ -2,3 +2,4 @@ alloc_ll
 alloc_ll_tests
 *.o
 *.so
+valgrind_alloc_ll
